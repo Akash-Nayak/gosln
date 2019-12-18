@@ -5,7 +5,7 @@ import (
 	"io"
 )
 
-type Sln struct {
+type Solution struct {
 	Projects []Project
 }
 
@@ -85,8 +85,8 @@ func (p *Parser) expect(expected ...Token) (bool,error) {
 }
 
 // Parse parses a SQL SELECT statement.
-func (p *Parser) Parse() (Sln, error) {
-	var sln Sln
+func (p *Parser) Parse() (Solution, error) {
+	var sln Solution
 	for {
 		tok, _ := p.scanIgnoreWhitespace()
 		switch tok {

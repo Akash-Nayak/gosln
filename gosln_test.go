@@ -40,7 +40,6 @@ func TestParse(t *testing.T) {
 					SolutionGuid = {24B5D20A-F42B-4FA1-9057-DE2A992041A7}
 			EndGlobalSection
 	EndGlobal`
-	_ = sln
 	stmt, err := NewParser(strings.NewReader(sln)).Parse()
 	if(err != nil) {
 		fmt.Printf("Error: %s\n",err)
