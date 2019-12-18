@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"path/filepath"
+	"strings"
 	"io"
 )
 
@@ -64,7 +66,8 @@ func (p *Parser) ParseProject() (Project, error) {
 	if ok, err := p.expect(COMMA); !ok {
 		return proj, err
 	}
-	proj.ProjectFile, _ = p.ParseString()
+	s, _ := p.ParseString();
+	proj.ProjectFile = strings.Replace(s,`\`, string(filepath.Separator),-1)
 	if ok, err := p.expect(COMMA); !ok {
 		return proj, err
 	}
