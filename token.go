@@ -1,4 +1,4 @@
-package main
+package gosln
 
 // Token represents a lexical token.
 type Token int
