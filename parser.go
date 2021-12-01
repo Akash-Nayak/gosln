@@ -2,9 +2,9 @@ package gosln
 
 import (
 	"fmt"
+	"io"
 	"path/filepath"
 	"strings"
-	"io"
 )
 
 type Solution struct {
@@ -12,12 +12,12 @@ type Solution struct {
 }
 
 type Project struct {
-	ID string
-	Name string
-	ProjectFile string
-	TypeGUID string
+	ID           string
+	Name         string
+	ProjectFile  string
+	TypeGUID     string
+	IsDependency bool
 }
-
 
 // Parser represents a parser.
 type Parser struct {
@@ -34,11 +34,10 @@ func NewParser(r io.Reader) *Parser {
 	return &Parser{s: NewScanner(r)}
 }
 
-
 func (p *Parser) ParseString() (string, error) {
 	tok, lit := p.scanIgnoreWhitespace()
 	if tok != QUOTE {
-		return lit,nil
+		return lit, nil
 	} else {
 		var s string
 		for {
@@ -46,7 +45,7 @@ func (p *Parser) ParseString() (string, error) {
 			if tok != QUOTE {
 				s = s + lit
 			} else {
-				break;
+				break
 			}
 		}
 		return s, nil
@@ -59,17 +58,25 @@ func (p *Parser) ParseProject() (Project, error) {
 		return proj, err
 	}
 	proj.TypeGUID, _ = p.ParseString()
-	if ok, err := p.expect(CLOSEPAREN,EQUAL); !ok {
+	if ok, err := p.expect(CLOSEPAREN, EQUAL); !ok {
 		return proj, err
 	}
 	proj.Name, _ = p.ParseString()
 	if ok, err := p.expect(COMMA); !ok {
 		return proj, err
 	}
-	s, _ := p.ParseString();
-	proj.ProjectFile = strings.Replace(s,`\`, string(filepath.Separator),-1)
+	s, _ := p.ParseString()
+	proj.ProjectFile = strings.Replace(s, `\`, string(filepath.Separator), -1)
 	if ok, err := p.expect(COMMA); !ok {
 		return proj, err
+	}
+
+	if ok, err := p.expect(OPENPAREN); !ok {
+		return proj, err
+	}
+	ProjectDependencies, _ := p.ParseString()
+	if ProjectDependencies == "ProjectDependencies" {
+		proj.IsDependency = true
 	}
 	proj.ID, _ = p.ParseString()
 	if ok, err := p.expect(ENDPROJECT); !ok {
@@ -78,13 +85,13 @@ func (p *Parser) ParseProject() (Project, error) {
 	return proj, nil
 }
 
-func (p *Parser) expect(expected ...Token) (bool,error) {
-	for _, exp := range(expected) {
+func (p *Parser) expect(expected ...Token) (bool, error) {
+	for _, exp := range expected {
 		if tok, lit := p.scanIgnoreWhitespace(); tok != exp {
-			return false,fmt.Errorf("unexpected token %q",lit)
+			return false, fmt.Errorf("unexpected token %q", lit)
 		}
 	}
-	return true,nil
+	return true, nil
 }
 
 // Parse parses a SQL SELECT statement.
@@ -100,7 +107,7 @@ func (p *Parser) Parse() (Solution, error) {
 			sln.Projects = append(sln.Projects, proj)
 		}
 		if tok == EOF {
-			break;
+			break
 		}
 	}
 	return sln, nil

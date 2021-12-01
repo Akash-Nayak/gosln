@@ -95,7 +95,6 @@ func (s *Scanner) scanIdent() (tok Token, lit string) {
 		}
 	}
 
-
 	// If the string matches a keyword then return that keyword.
 	switch strings.ToUpper(buf.String()) {
 	case "PROJECT":
